@@ -1,11 +1,14 @@
-import AllRouter from "./router_module/AllRoutes.tsx";
-
+import GlobalProvider from "./components/GlobalProvider";
+import MainRouter from "./router/MainRouter";
 
 function App() {
-
   return (
-     <AllRouter/>
-  )
+    <div className="h-screen w-screen">
+      <GlobalProvider>
+        <MainRouter />
+      </GlobalProvider>
+    </div>
+  );
 }
 
-export default App
+export default App;
