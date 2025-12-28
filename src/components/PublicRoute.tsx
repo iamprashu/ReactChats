@@ -3,14 +3,18 @@ import useAuthContext from "../hooks/useAuthContext";
 import { Navigate, Outlet, useNavigate } from "react-router-dom";
 
 const PublicRoute = () => {
-  const { isSessionActive } = useAuthContext();
+  const { isSessionActive, sessionLoaded } = useAuthContext();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isSessionActive) {
+    if (isSessionActive && sessionLoaded) {
       navigate("/app");
     }
   }, [isSessionActive]);
+
+  if (!sessionLoaded) {
+    return <div>Pleasse wait while we load authentication</div>;
+  }
 
   return <Outlet />;
 };
