@@ -1,5 +1,18 @@
+import useAuthContext from "../hooks/useAuthContext";
+
 const Home = () => {
-  return <div>Home Page</div>;
+  const { logoutSession } = useAuthContext();
+  return (
+    <div className="w-screen h-screen bg-amber-100">
+      <button
+        onClick={() => {
+          logoutSession();
+        }}
+      >
+        logout
+      </button>
+    </div>
+  );
 };
 
 export default Home;
