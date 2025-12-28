@@ -1,1 +1,1 @@
-Will do as much as i can in this application
+A complete End to End Enc Chat Application With Mern and using typescript

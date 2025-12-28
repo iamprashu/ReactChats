@@ -10,13 +10,17 @@ export default function AuthProvider({
   const [sessionLoaded, setSessionLoaded] = useState<boolean>(false);
   const [sessionToken, setSessionToken] = useState<string>("");
 
-  useEffect(() => {
-    setTimeout(() => {
-      setSessionLoaded(true);
-      setSessionActive(true);
-      setSessionToken("prashu");
-    }, 5000);
-  }, [sessionLoaded, setSessionLoaded, sessionToken]);
+  async function checkSession() {
+    // api call to server based on response get states updated
+  }
+
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     setSessionLoaded(true);
+  //     setSessionActive(false);
+  //     setSessionToken("prashu");
+  //   }, 5000);
+  // }, [sessionLoaded, setSessionLoaded, sessionToken]);
 
   const login = () => {
     setSessionActive(true);
