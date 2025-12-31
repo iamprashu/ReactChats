@@ -3,7 +3,8 @@ import authRoutes from "./routers/Auth.router";
 import cors from "cors";
 import "dotenv/config.js";
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT!;
+import cookieparser from "cookie-parser";
 
 if (!PORT) {
   throw new Error("Please provide application port");
@@ -16,6 +17,7 @@ const corsConfig = {
 // middlewares
 app.use(express.json());
 app.use(cors(corsConfig));
+app.use(cookieparser());
 
 // routes
 app.use("/api/auth", authRoutes);
