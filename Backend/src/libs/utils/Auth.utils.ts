@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import "dotenv/config";
+import CryptoJS from "crypto-js";
 
 import { I_JWTPAYLOAD } from "../types";
 import { verify } from "node:crypto";
@@ -20,26 +21,6 @@ export function getRefreshToken(payload: I_JWTPAYLOAD): string {
   });
 }
 
-export const checkToken = (
-  token: string,
-  name: "refresh" | "access"
-): Boolean => {
-  try {
-    if (name === "refresh") {
-      const checkToken = jwt.verify(token, REFRESH_SECRET);
-
-      if (!checkToken) {
-        return false;
-      }
-    } else {
-      const checkToken = jwt.verify(token, ACCESS_SECRET);
-      if (!checkToken) {
-        return false;
-      }
-    }
-
-    return true;
-  } catch (error) {
-    return false;
-  }
+export const hashToken = (token: string): string => {
+  return CryptoJS.SHA256(token).toString(CryptoJS.enc.Hex);
 };
