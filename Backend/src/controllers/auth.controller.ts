@@ -4,9 +4,9 @@ import { prisma } from "../config/prismaConfig";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
 import {
-  checkToken,
   getAccessToken,
   getRefreshToken,
+  hashToken,
 } from "../libs/utils/Auth.utils";
 
 const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET!;
@@ -100,7 +100,7 @@ export const loginController = async (
     const newSession = await prisma.session.create({
       data: {
         userId: checkUser.id,
-        refreshTokenHash: refreshToken,
+        refreshTokenHash: hashToken(refreshToken),
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       },
     });
@@ -115,7 +115,7 @@ export const loginController = async (
     res.cookie("refreshToken", refreshToken, {
       sameSite: "lax",
       httpOnly: true,
-      secure: true,
+      secure: false,
     });
 
     res.status(200).json({
@@ -132,7 +132,7 @@ export const loginController = async (
   }
 };
 export const checkSessionController = async (req: Request, res: Response) => {
-  const { refreshToken } = req.body;
+  const { refreshToken } = req.cookies;
 
   if (!refreshToken) {
     res.status(401).json({
@@ -143,17 +143,56 @@ export const checkSessionController = async (req: Request, res: Response) => {
   }
 
   try {
-    const isValid = jwt.verify(refreshToken, REFRESH_SECRET);
+    const isValid = jwt.verify(refreshToken, REFRESH_SECRET) as { id: string };
 
     if (!isValid) {
       res.status(401).json({
         success: false,
         message: "Session expired please login again",
       });
+      return;
     }
 
-    const checkTokenInDb = prisma.session.findFirst({
-      where: { userId: isValid.id },
+    const validateSession = await prisma.session.findFirst({
+      where: {
+        userId: isValid.id,
+        refreshTokenHash: hashToken(refreshToken),
+        isRevoked: false,
+      },
     });
-  } catch (error) {}
+
+    if (!validateSession) {
+      res.status(401).json({
+        success: false,
+        message: "Session expired or invalid please login again",
+      });
+      return;
+    }
+
+    if (validateSession.expiresAt <= new Date()) {
+      await prisma.session.update({
+        where: { id: validateSession.id },
+        data: { isRevoked: true },
+      });
+
+      res.status(401).json({
+        success: false,
+        message: "Sorry session is expired please login again",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Welcome back",
+    });
+    return;
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: "sorry something went wrong",
+    });
+
+    console.error(`CheckSession : ${error.message}`);
+  }
 };
