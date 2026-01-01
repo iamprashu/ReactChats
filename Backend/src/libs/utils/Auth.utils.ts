@@ -3,8 +3,6 @@ import "dotenv/config";
 import CryptoJS from "crypto-js";
 
 import { I_JWTPAYLOAD } from "../types";
-import { verify } from "node:crypto";
-import { access } from "node:fs";
 
 const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET!;
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET!;
