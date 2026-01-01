@@ -5,6 +5,7 @@ import "dotenv/config.js";
 const app = express();
 const PORT = process.env.PORT!;
 import cookieparser from "cookie-parser";
+import { startSessionCleanupJob } from "./libs/jobs/sessionCleanup.job";
 
 if (!PORT) {
   throw new Error("Please provide application port");
@@ -21,7 +22,7 @@ app.use(cookieparser());
 
 // routes
 app.use("/api/auth", authRoutes);
-
+startSessionCleanupJob();
 // app runners
 app.listen(PORT, () => {
   console.log(`Backend: server is up at port ${PORT}`);
