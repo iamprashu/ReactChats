@@ -196,3 +196,115 @@ export const checkSessionController = async (req: Request, res: Response) => {
     console.error(`CheckSession : ${error.message}`);
   }
 };
+
+export const refreshTokenController = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { refreshToken } = req.cookies;
+
+  if (!refreshToken) {
+    console.log("Yaha fata");
+    res.status(401).json({
+      success: false,
+      message: "Invalid Session Please login again",
+    });
+    return;
+  }
+
+  try {
+    const refreshTokenHash = hashToken(refreshToken);
+
+    console.debug(`in token hash : ${refreshTokenHash}`);
+
+    const checkSession = await prisma.session.findFirst({
+      where: { refreshTokenHash, isRevoked: false },
+    });
+
+    console.debug(`session checked with : ${refreshTokenHash}`);
+
+    if (!checkSession) {
+      console.log("yaha fata");
+      res.status(401).json({
+        success: false,
+        message: "Invalid Session please login again",
+      });
+      return;
+    }
+
+    const updateOldSession = prisma.session.update({
+      //jaha pe ye id aur same hash h usko revoke krdo
+      where: { id: checkSession.id, refreshTokenHash },
+      data: { isRevoked: true },
+    });
+
+    console.debug(`updated old session : ${refreshTokenHash}`);
+
+    if (!updateOldSession) {
+      res.status(401).json({
+        success: false,
+        message: "Cannot revive session please login again",
+      });
+    }
+
+    const userById = await prisma.user.findFirst({
+      where: { id: checkSession.userId },
+    });
+
+    if (!userById) {
+      res.status(401).json({
+        success: false,
+        message: "Invalid session please login again",
+      });
+      return;
+    }
+
+    const accessToken = jwt.sign({ id: userById?.id }, ACCESS_SECRET, {
+      expiresIn: "15m",
+    });
+    // ye to 7 days ka hi valid h actually session backend me hi handel hoga so no worries
+    const newRefreshToken = getRefreshToken({ id: userById.id });
+
+    const newRefreshTokenHash = hashToken(newRefreshToken);
+
+    console.debug(`new refresh token hash : ${newRefreshTokenHash}`);
+
+    const updateSession = await prisma.session.update({
+      where: { id: checkSession.id, refreshTokenHash },
+      data: {
+        refreshTokenHash: newRefreshTokenHash,
+      },
+    });
+
+    console.debug(`updated session id  : ${updateSession.id}`);
+
+    if (!updateSession) {
+      res.status(401).json({
+        success: false,
+        message:
+          "Something went wrong while refreshing token please login again",
+      });
+      return;
+    }
+
+    res.cookie("refreshToken", newRefreshToken, {
+      sameSite: "lax",
+      httpOnly: true,
+      secure: false,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Session Resumed",
+      accessToken,
+    });
+    return;
+  } catch (error: any) {
+    console.error(`RefreshToken Controller: ${error.message}`);
+
+    res.status(500).json({
+      success: false,
+      message: "Server error please try again later",
+    });
+  }
+};
