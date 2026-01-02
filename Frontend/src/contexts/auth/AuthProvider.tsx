@@ -7,20 +7,10 @@ export default function AuthProvider({
   children: React.ReactNode;
 }) {
   const [isSessionActive, setSessionActive] = useState<boolean>(false);
-  const [sessionLoaded, setSessionLoaded] = useState<boolean>(false);
+  const [sessionLoaded, setSessionLoaded] = useState<boolean>(true);
   const [sessionToken, setSessionToken] = useState<string>("");
 
-  async function checkSession() {
-    // api call to server based on response get states updated
-  }
-
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     setSessionLoaded(true);
-  //     setSessionActive(false);
-  //     setSessionToken("prashu");
-  //   }, 5000);
-  // }, [sessionLoaded, setSessionLoaded, sessionToken]);
+  async function checkSession() {}
 
   const login = () => {
     setSessionActive(true);

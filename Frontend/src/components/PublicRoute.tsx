@@ -10,7 +10,7 @@ const PublicRoute = () => {
     if (isSessionActive && sessionLoaded) {
       navigate("/app");
     }
-  }, [isSessionActive]);
+  }, [isSessionActive, sessionLoaded]);
 
   if (!sessionLoaded) {
     return <div>Pleasse wait while we load authentication</div>;
