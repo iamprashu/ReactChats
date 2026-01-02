@@ -38,9 +38,16 @@ export const signupController = async (
 
     const encPassword = await bcrypt.hash(password, 10);
 
-    await prisma.user.create({
+    const newUser = await prisma.user.create({
       data: { email, password: encPassword, name },
     });
+
+    if (!newUser) {
+      res.status(500).json({
+        success: false,
+        message: "Sorry something went wrong",
+      });
+    }
 
     res.status(201).json({
       success: true,
