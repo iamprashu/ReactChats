@@ -1,11 +1,7 @@
-import React from 'react'
+import { Outlet } from "react-router-dom";
 
 const PublicRoutes = () => {
-  return (
-    <div>
-      
-    </div>
-  )
-}
+  return <Outlet />;
+};
 
-export default PublicRoutes
+export default PublicRoutes;
