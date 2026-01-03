@@ -1,11 +1,7 @@
-import React from 'react'
+import GlobalProvider from "./components/global/GlobalProvider";
 
 const App = () => {
-  return (
-    <div>
-      
-    </div>
-  )
-}
+  return <GlobalProvider />;
+};
 
-export default App
+export default App;
